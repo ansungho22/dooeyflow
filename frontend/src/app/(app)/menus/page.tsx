@@ -67,24 +67,34 @@ export default function MenusPage() {
             <Input
               label="메뉴명"
               required
+              autoComplete="off"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="아메리카노"
             />
             <Input
-              label="가격"
+              label="가격(원)"
               type="number"
+              inputMode="numeric"
               min="0"
+              step="any"
+              autoComplete="off"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="4500"
             />
-            <Input
-              label="POS 코드 (선택)"
-              value={posCode}
-              onChange={(e) => setPosCode(e.target.value)}
-              placeholder="토스 연동 시"
-            />
+            <div className="col-span-2 sm:col-span-1">
+              <Input
+                label="POS 코드 (선택)"
+                autoComplete="off"
+                value={posCode}
+                onChange={(e) => setPosCode(e.target.value)}
+                placeholder="비워두셔도 됩니다"
+              />
+              <p className="mt-1 text-xs text-text-muted">
+                토스 POS 자동 차감용. 수동 입력만 쓰면 비워두세요.
+              </p>
+            </div>
             <Button type="submit">메뉴 추가</Button>
             {error && (
               <p className="col-span-2 text-sm text-danger sm:col-span-4">{error}</p>
