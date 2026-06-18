@@ -2,9 +2,10 @@
 
 from fastapi import APIRouter
 
-from app.api.v1.routes import auth, materials, menus
+from app.api.v1.routes import auth, inventory, materials, menus
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(auth.router)
 api_router.include_router(materials.router)
 api_router.include_router(menus.router)
+api_router.include_router(inventory.router)
