@@ -1,5 +1,7 @@
-"""인증 유틸: 비밀번호 해싱 및 JWT 발급/검증."""
+"""인증 유틸: 비밀번호 해싱, JWT 발급/검증, 웹훅 서명 검증."""
 
+import hashlib
+import hmac
 from datetime import UTC, datetime, timedelta
 
 from jose import JWTError, jwt
@@ -36,3 +38,18 @@ def decode_access_token(token: str) -> str | None:
     except JWTError:
         return None
     return payload.get("sub")
+
+
+def verify_webhook_signature(raw_body: bytes, signature: str | None) -> bool:
+    """토스 웹훅 서명(HMAC-SHA256)을 검증한다.
+
+    raw_body는 가공 전 원본 바이트여야 한다. 타이밍 공격 방지를 위해
+    상수 시간 비교(compare_digest)를 사용한다.
+    """
+    secret = settings.toss_webhook_secret
+    if not secret or not signature:
+        return False
+    expected = hmac.new(
+        secret.encode("utf-8"), raw_body, hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature)
