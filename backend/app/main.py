@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI
 
+from app.api.v1.router import api_router
 from app.core.config import settings
 from app.schemas.common import HealthResponse
 
@@ -10,6 +11,8 @@ app = FastAPI(
     description="요식업 재고관리 앱 백엔드",
     version="0.1.0",
 )
+
+app.include_router(api_router)
 
 
 @app.get("/health", response_model=HealthResponse, tags=["system"])
