@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { ApiError, createMaterial } from "@/lib/api";
 import type { Material } from "@/lib/types";
-import { UNIT_OPTIONS } from "@/lib/units";
+import { toBaseUnit, UNIT_OPTIONS } from "@/lib/units";
 
 interface AddMaterialFormProps {
   storeId: number;
@@ -23,16 +23,23 @@ export function AddMaterialForm({ storeId, onAdded }: AddMaterialFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // kg/L 등 변환되는 단위를 골랐을 때만 변환 미리보기를 보여준다.
+  const preview = currentStock ? toBaseUnit(currentStock, unit) : null;
+  const converted = preview && preview.unit !== unit ? preview : null;
+
   async function handleSubmit(event: React.FormEvent): Promise<void> {
     event.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
+      // kg/L 입력은 기본 단위(g/ml)로 변환해 저장한다 (DB는 항상 기본 단위).
+      const current = toBaseUnit(currentStock || "0", unit);
+      const safety = toBaseUnit(safetyStock || "0", unit);
       const material = await createMaterial(storeId, {
         name,
-        unit,
-        current_stock: currentStock || "0",
-        safety_stock: safetyStock || "0",
+        unit: current.unit,
+        current_stock: current.value,
+        safety_stock: safety.value,
       });
       onAdded(material);
       setName("");
@@ -91,6 +98,13 @@ export function AddMaterialForm({ storeId, onAdded }: AddMaterialFormProps) {
           placeholder="0"
         />
       </div>
+      {converted && currentStock && (
+        <p className="rounded bg-accent-soft px-3 py-2 text-xs font-medium text-accent-strong">
+          {currentStock}
+          {unit} → <b>{converted.value}{converted.unit}</b>로 저장됩니다 (정확한 계산을
+          위해 {converted.unit} 단위로 관리)
+        </p>
+      )}
       {error && <p className="text-sm text-danger">{error}</p>}
       <Button type="submit" disabled={submitting} className="w-full" size="lg">
         {submitting ? "추가 중…" : "원자재 추가"}
