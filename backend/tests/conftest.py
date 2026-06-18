@@ -46,3 +46,25 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()
+
+
+async def register_and_login(client: AsyncClient, email: str = "owner@test.com") -> str:
+    """헬퍼: 회원가입 + 로그인 후 액세스 토큰 반환."""
+    await client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": "supersecret", "full_name": "사장"},
+    )
+    resp = await client.post(
+        "/api/v1/auth/login", json={"email": email, "password": "supersecret"}
+    )
+    return resp.json()["access_token"]
+
+
+async def create_store(client: AsyncClient, token: str, name: str = "테스트 카페") -> int:
+    """헬퍼: 매장 생성 후 store_id 반환."""
+    resp = await client.post(
+        "/api/v1/auth/stores",
+        json={"name": name},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    return resp.json()["id"]
