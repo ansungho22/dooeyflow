@@ -18,8 +18,13 @@ export function MaterialList({ materials }: MaterialListProps) {
   }
 
   return (
-    <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface-raised shadow-card">
-      {materials.map((material) => (
+    <div className="overflow-hidden rounded-lg border border-border bg-surface-raised shadow-card">
+      <div className="flex items-center justify-between border-b border-border bg-surface-sunken px-5 py-2">
+        <span className="text-xs font-medium text-text-muted">원자재</span>
+        <span className="text-xs font-medium text-text-muted">현재고 / 안전재고</span>
+      </div>
+      <ul className="divide-y divide-border">
+        {materials.map((material) => (
         <li
           key={material.id}
           className={cn(
@@ -27,35 +32,35 @@ export function MaterialList({ materials }: MaterialListProps) {
             material.is_low_stock && "bg-danger-soft/60",
           )}
         >
-          <div className="min-w-0">
+          <div className="flex min-w-0 items-center gap-2">
             <p className="truncate font-semibold">{material.name}</p>
-            <p className="text-xs text-text-muted">
-              안전재고 {formatQuantity(material.safety_stock)}
-              {material.unit}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
             {material.is_low_stock && (
-              <span className="rounded-full bg-danger px-2.5 py-0.5 text-xs font-bold text-white">
+              <span className="shrink-0 rounded-full bg-danger px-2 py-0.5 text-xs font-bold text-white">
                 부족
               </span>
             )}
-            <div className="text-right">
-              <span
-                className={cn(
-                  "tabular text-lg font-bold",
-                  material.is_low_stock ? "text-danger" : "text-text",
-                )}
-              >
-                {formatQuantity(material.current_stock)}
-              </span>
-              <span className="ml-0.5 text-sm text-text-muted">
-                {material.unit}
-              </span>
-            </div>
+          </div>
+
+          {/* 현재고 / 안전재고 분수 형태 (예: 3 / 2 g) */}
+          <div className="flex items-baseline gap-1 whitespace-nowrap">
+            <span
+              className={cn(
+                "tabular text-lg font-bold",
+                material.is_low_stock ? "text-danger" : "text-text",
+              )}
+            >
+              {formatQuantity(material.current_stock)}
+            </span>
+            <span className="tabular text-sm text-text-muted">
+              / {formatQuantity(material.safety_stock)}
+            </span>
+            {material.unit && (
+              <span className="ml-0.5 text-sm text-text-muted">{material.unit}</span>
+            )}
           </div>
         </li>
-      ))}
-    </ul>
+        ))}
+      </ul>
+    </div>
   );
 }
