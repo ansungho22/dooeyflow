@@ -6,6 +6,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StoreSetup } from "@/components/dashboard/StoreSetup";
 import { StoreContextProvider } from "@/lib/StoreContext";
 import { useAuth } from "@/lib/useAuth";
+import { usePushRegistration } from "@/lib/usePushRegistration";
 import { useStore } from "@/lib/useStore";
 
 /**
@@ -27,6 +28,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!authLoading && !user) router.replace("/login");
   }, [authLoading, user, router]);
+
+  // 네이티브(iOS) 환경이면 활성 매장 기준으로 APNs 토큰 등록
+  usePushRegistration(activeStore?.id ?? null);
 
   if (authLoading || (user && storeLoading)) {
     return (

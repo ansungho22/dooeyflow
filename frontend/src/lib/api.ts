@@ -173,6 +173,19 @@ export async function deleteRecipeItem(
   );
 }
 
+// --- 푸시 알림 디바이스 토큰 ---
+
+export async function registerDeviceToken(
+  storeId: number,
+  platform: "ios" | "web",
+  token: string,
+): Promise<void> {
+  await request(`/api/v1/stores/${storeId}/device-tokens`, {
+    method: "POST",
+    body: JSON.stringify({ platform, token }),
+  });
+}
+
 // --- 재고 차감 ---
 
 export async function batchSale(
