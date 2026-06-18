@@ -48,6 +48,10 @@ export function MenuRecipeEditor({
   const materialUnit = (id: number): string =>
     materials.find((m) => m.id === id)?.unit ?? "";
 
+  // 현재 선택된 원자재의 단위 (소모량 입력 옆에 표시)
+  const selectedUnit =
+    materialId === "" ? "" : materialUnit(materialId);
+
   async function handleAdd(event: React.FormEvent): Promise<void> {
     event.preventDefault();
     if (materialId === "") return;
@@ -111,37 +115,50 @@ export function MenuRecipeEditor({
       )}
 
       {availableMaterials.length > 0 && (
-        <form onSubmit={handleAdd} className="flex flex-wrap items-center gap-2">
-          <select
-            value={materialId}
-            onChange={(e) =>
-              setMaterialId(e.target.value === "" ? "" : Number(e.target.value))
-            }
-            required
-            aria-label="원자재 선택"
-            className="flex-1 rounded border border-border bg-surface-raised px-2.5 py-2 text-sm focus:border-accent focus:outline-none"
-          >
-            <option value="">원자재 선택</option>
-            {availableMaterials.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name} ({m.unit})
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            min="0.0001"
-            step="0.0001"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            required
-            placeholder="소모량"
-            aria-label="메뉴당 소모량"
-            className="w-28 rounded border border-border bg-surface-raised px-2.5 py-2 text-sm focus:border-accent focus:outline-none"
-          />
-          <Button type="submit" variant="secondary" className="px-3 py-2">
-            추가
-          </Button>
+        <form onSubmit={handleAdd} className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={materialId}
+              onChange={(e) =>
+                setMaterialId(e.target.value === "" ? "" : Number(e.target.value))
+              }
+              required
+              aria-label="원자재 선택"
+              className="flex-1 rounded border border-border bg-surface-raised px-2.5 py-2 text-sm focus:border-accent focus:outline-none"
+            >
+              <option value="">원자재 선택</option>
+              {availableMaterials.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name} ({m.unit})
+                </option>
+              ))}
+            </select>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="any"
+                autoComplete="off"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                required
+                placeholder="수량"
+                aria-label="메뉴 1개당 소모량"
+                className="tabular w-24 rounded border border-border bg-surface-raised px-2.5 py-2 text-right text-sm focus:border-accent focus:outline-none"
+              />
+              {/* 선택한 원자재 단위를 표시해 입력 단위를 명확히 한다 */}
+              <span className="w-8 text-sm text-text-muted">
+                {selectedUnit || "단위"}
+              </span>
+            </div>
+            <Button type="submit" variant="secondary" className="px-3 py-2">
+              추가
+            </Button>
+          </div>
+          <p className="text-xs text-text-muted">
+            메뉴 1개를 팔 때 소모되는 양 (예: 원두 18, 우유 150). 정수·소수 모두 가능.
+          </p>
         </form>
       )}
       {error && <p className="text-sm text-danger">{error}</p>}

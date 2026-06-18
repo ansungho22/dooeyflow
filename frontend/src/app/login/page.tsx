@@ -17,12 +17,20 @@ export default function LoginPage() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent): Promise<void> {
     event.preventDefault();
     setError(null);
+
+    // 회원가입 시 비밀번호 일치 확인 (클라이언트 선검증)
+    if (mode === "register" && password !== passwordConfirm) {
+      setError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       if (mode === "register") {
@@ -37,6 +45,13 @@ export default function LoginPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function switchMode(): void {
+    setMode(mode === "login" ? "register" : "login");
+    setError(null);
+    setPassword("");
+    setPasswordConfirm("");
   }
 
   return (
@@ -77,6 +92,18 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="8자 이상"
           />
+          {mode === "register" && (
+            <Input
+              label="비밀번호 확인"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={8}
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              placeholder="비밀번호 재입력"
+            />
+          )}
 
           {error && (
             <p className="rounded bg-danger-soft px-3 py-2 text-sm text-danger">
@@ -95,10 +122,7 @@ export default function LoginPage() {
 
         <button
           type="button"
-          onClick={() => {
-            setMode(mode === "login" ? "register" : "login");
-            setError(null);
-          }}
+          onClick={switchMode}
           className="mt-5 w-full text-sm text-text-muted transition-colors hover:text-accent"
         >
           {mode === "login"

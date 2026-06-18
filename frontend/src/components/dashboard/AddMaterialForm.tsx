@@ -59,15 +59,18 @@ export function AddMaterialForm({ storeId, onAdded }: AddMaterialFormProps) {
       <Input
         label="단위"
         required
+        autoComplete="off"
         value={unit}
         onChange={(e) => setUnit(e.target.value)}
-        placeholder="g"
+        placeholder="g, ml, 개"
       />
       <Input
         label="현재고"
         type="number"
+        inputMode="decimal"
         min="0"
-        step="0.0001"
+        step="any"
+        autoComplete="off"
         value={currentStock}
         onChange={(e) => setCurrentStock(e.target.value)}
         placeholder="0"
@@ -75,8 +78,10 @@ export function AddMaterialForm({ storeId, onAdded }: AddMaterialFormProps) {
       <Input
         label="안전재고"
         type="number"
+        inputMode="decimal"
         min="0"
-        step="0.0001"
+        step="any"
+        autoComplete="off"
         value={safetyStock}
         onChange={(e) => setSafetyStock(e.target.value)}
         placeholder="0"
