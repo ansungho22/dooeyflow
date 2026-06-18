@@ -5,7 +5,13 @@ import { MenuRecipeEditor } from "@/components/menus/MenuRecipeEditor";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { ApiError, createMenu, listMaterials, listMenus } from "@/lib/api";
+import {
+  ApiError,
+  createMenu,
+  deleteMenu,
+  listMaterials,
+  listMenus,
+} from "@/lib/api";
 import { formatWon } from "@/lib/format";
 import { useActiveStore } from "@/lib/StoreContext";
 import type { Material, Menu } from "@/lib/types";
@@ -58,6 +64,12 @@ export default function MenusPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleDeleteMenu(menu: Menu): Promise<void> {
+    if (!window.confirm(`'${menu.name}' 메뉴를 삭제할까요?`)) return;
+    await deleteMenu(store.id, menu.id);
+    setMenus((prev) => prev.filter((m) => m.id !== menu.id));
   }
 
   return (
@@ -116,6 +128,11 @@ export default function MenusPage() {
 
       <section className="space-y-3">
         <h2 className="px-1 text-heading font-bold">메뉴 · 레시피</h2>
+        <div className="rounded-lg bg-accent-soft px-4 py-3 text-[13px] leading-relaxed text-accent-strong">
+          레시피에는 <b>메뉴 1개를 팔 때 쓰는 양</b>만 적으면 됩니다 (예: 아메리카노 →
+          원두 20g). 재고 수량과 무관하게 적어 두면, <b>판매 입력 시 재고에서 자동으로
+          차감</b>됩니다. 재고와 <b>같은 단위</b>로 적어 주세요.
+        </div>
         {loading ? (
           <p className="px-1 text-sm text-text-subtle">불러오는 중…</p>
         ) : menus.length === 0 ? (
@@ -130,11 +147,28 @@ export default function MenusPage() {
           <div className="space-y-3">
             {menus.map((menu) => (
               <Card key={menu.id} className="space-y-4">
-                <div className="flex items-baseline justify-between">
-                  <h3 className="text-lg font-bold">{menu.name}</h3>
-                  <span className="tabular text-sm font-semibold text-text-muted">
-                    {formatWon(menu.price)}
-                  </span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="text-lg font-bold">{menu.name}</h3>
+                    <span className="tabular text-sm font-semibold text-text-muted">
+                      {formatWon(menu.price)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteMenu(menu)}
+                    aria-label={`${menu.name} 메뉴 삭제`}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-text-subtle transition-colors hover:bg-danger-soft hover:text-danger"
+                  >
+                    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
+                      <path
+                        d="M5 5l10 10M15 5L5 15"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
                 </div>
                 <MenuRecipeEditor
                   storeId={store.id}

@@ -151,6 +151,12 @@ export async function createMenu(
   });
 }
 
+export async function deleteMenu(storeId: number, menuId: number): Promise<void> {
+  return request<void>(`/api/v1/stores/${storeId}/menus/${menuId}`, {
+    method: "DELETE",
+  });
+}
+
 // --- 레시피 (BOM) ---
 
 export async function listRecipes(
