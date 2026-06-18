@@ -31,6 +31,13 @@ export const UNIT_OPTIONS = Object.entries(UNIT_DEFS).map(([value, def]) => ({
   label: def.label,
 }));
 
+/** Select 옵션 형태로 사용하는 단위 목록. */
+export const COMMON_UNITS = Object.entries(UNIT_DEFS).map(([value, def]) => ({
+  value,
+  label: def.label,
+  base: def.base,
+}));
+
 /**
  * 소수 문자열의 소수점을 오른쪽으로 places칸 이동(×10^places)한다.
  * 부동소수점을 쓰지 않아 정확하다. 예: shiftRight("0.5", 3) -> "500".
@@ -69,4 +76,62 @@ export function toBaseUnit(
     value: value === "" ? "0" : shiftRight(value, def.shift),
     unit: def.base,
   };
+}
+
+/**
+ * 소수 문자열의 소수점을 왼쪽으로 places칸 이동(÷10^places)한다.
+ * 예: shiftLeft("500", 3) -> "0.5"
+ */
+function shiftLeft(num: string, places: number): string {
+  if (places <= 0) return num;
+  const negative = num.startsWith("-");
+  let s = negative ? num.slice(1) : num;
+
+  // 소수점 있으면 먼저 정수화
+  const [intPartRaw, fracPartRaw = ""] = s.split(".");
+  s = intPartRaw + fracPartRaw;
+  places += fracPartRaw.length;
+
+  // 왼쪽 0 패딩
+  while (s.length <= places) {
+    s = "0" + s;
+  }
+  const intPart = s.slice(0, s.length - places) || "0";
+  const fracPart = s.slice(s.length - places).replace(/0+$/, "");
+  const result = fracPart ? `${intPart}.${fracPart}` : intPart;
+  return negative ? `-${result}` : result;
+}
+
+/**
+ * 입력 단위와 값을 기본 단위 숫자로 변환한다.
+ * 예: parseInputToBaseUnit("0.5", "kg") -> "500"
+ */
+export function parseInputToBaseUnit(value: string, inputUnit: string): string {
+  const def = UNIT_DEFS[inputUnit] ?? { base: inputUnit, shift: 0, label: inputUnit };
+  return value === "" ? "0" : shiftRight(value, def.shift);
+}
+
+/**
+ * 기본 단위 값을 표시용 단위로 변환한다.
+ * DB에 g로 저장된 값을 kg 단위로 보여줄 때 사용.
+ * 예: formatForDisplay("500", "g") -> "0.5" (kg으로 표시될 때)
+ */
+export function formatForDisplay(value: string | number, baseUnit: string): string {
+  const displayUnit = getDisplayUnit(baseUnit);
+  const def = UNIT_DEFS[displayUnit];
+  if (!def || def.shift === 0) {
+    return String(value);
+  }
+  return shiftLeft(String(value), def.shift);
+}
+
+/**
+ * 기본 단위에 대응하는 표시 단위를 반환한다.
+ * 예: "g" -> "kg", "ml" -> "L"
+ */
+export function getDisplayUnit(baseUnit: string): string {
+  // 기본 단위가 g, ml이면 kg, L로 표시
+  if (baseUnit === "g") return "kg";
+  if (baseUnit === "ml") return "L";
+  return baseUnit;
 }

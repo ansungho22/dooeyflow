@@ -35,6 +35,23 @@ class Settings(BaseSettings):
     # CORS 허용 출처 (쉼표 구분). 개발 시 프론트엔드 dev 서버 허용.
     cors_origins: str = Field(default="http://localhost:3000")
 
+    # 소셜 로그인 - Apple
+    apple_client_id: str = Field(default="")
+    apple_team_id: str = Field(default="")
+    apple_key_id: str = Field(default="")
+    apple_private_key: str = Field(default="")  # Base64 encoded .p8 key
+
+    # 소셜 로그인 - Kakao
+    kakao_client_id: str = Field(default="")
+    kakao_client_secret: str = Field(default="")
+
+    # 소셜 로그인 - Naver
+    naver_client_id: str = Field(default="")
+    naver_client_secret: str = Field(default="")
+
+    # 소셜 로그인 공통
+    oauth_redirect_base: str = Field(default="http://localhost:3000")
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

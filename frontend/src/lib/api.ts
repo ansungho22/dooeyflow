@@ -93,6 +93,20 @@ export async function fetchMe(): Promise<User> {
   return request<User>("/api/v1/auth/me");
 }
 
+// --- 소셜 로그인 ---
+
+export type OAuthProvider = "kakao" | "naver" | "apple";
+
+interface OAuthStartResponse {
+  authorization_url: string;
+  state: string;
+}
+
+/** OAuth 인증 URL 가져오기 */
+export async function getOAuthUrl(provider: OAuthProvider): Promise<OAuthStartResponse> {
+  return request<OAuthStartResponse>(`/api/v1/oauth/${provider}/start`);
+}
+
 // --- 매장 ---
 
 export async function listStores(): Promise<Store[]> {
@@ -122,12 +136,39 @@ export async function createMaterial(
   });
 }
 
+export async function updateMaterial(
+  storeId: number,
+  materialId: number,
+  data: Partial<{ name: string; unit: string; current_stock: string; safety_stock: string }>,
+): Promise<Material> {
+  return request<Material>(`/api/v1/stores/${storeId}/materials/${materialId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
 export async function deleteMaterial(
   storeId: number,
   materialId: number,
 ): Promise<void> {
   return request<void>(`/api/v1/stores/${storeId}/materials/${materialId}`, {
     method: "DELETE",
+  });
+}
+
+// --- 매장 (stores 전용 라우터) ---
+
+export async function getStore(storeId: number): Promise<Store> {
+  return request<Store>(`/api/v1/stores/${storeId}`);
+}
+
+export async function updateStore(
+  storeId: number,
+  data: Partial<{ name: string; toss_enabled: boolean }>,
+): Promise<Store> {
+  return request<Store>(`/api/v1/stores/${storeId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
   });
 }
 

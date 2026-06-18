@@ -6,6 +6,7 @@ import type { Store } from "@/lib/types";
 interface StoreContextValue {
   store: Store;
   refreshTrigger: number;
+  refresh: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextValue | null>(null);
@@ -19,4 +20,13 @@ export function useActiveStore(): Store {
     throw new Error("useActiveStore must be used within the app layout");
   }
   return ctx.store;
+}
+
+/** 매장 정보를 다시 불러온다. */
+export function useStoreRefresh(): () => Promise<void> {
+  const ctx = useContext(StoreContext);
+  if (ctx === null) {
+    throw new Error("useStoreRefresh must be used within the app layout");
+  }
+  return ctx.refresh;
 }

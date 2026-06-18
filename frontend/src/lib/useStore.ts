@@ -55,5 +55,15 @@ export function useStore(enabled: boolean) {
     [],
   );
 
-  return { ...state, selectStore, addStore };
+  /** 현재 활성 매장 정보를 서버에서 다시 불러온다. */
+  const refresh = useCallback(async (): Promise<void> => {
+    const stores = await listStores();
+    setState((s) => {
+      const updated =
+        stores.find((st) => st.id === s.activeStore?.id) ?? stores[0] ?? null;
+      return { stores, activeStore: updated, loading: false };
+    });
+  }, []);
+
+  return { ...state, selectStore, addStore, refresh };
 }

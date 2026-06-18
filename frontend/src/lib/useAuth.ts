@@ -59,5 +59,12 @@ export function useAuth() {
     router.push("/login");
   }, [router]);
 
-  return { ...state, login, logout };
+  /** 소셜 로그인 등에서 직접 토큰을 설정하고 사용자 정보 로드. */
+  const setTokenAndFetchUser = useCallback(async (token: string): Promise<void> => {
+    setToken(token);
+    const user = await fetchMe();
+    setState({ user, loading: false });
+  }, []);
+
+  return { ...state, login, logout, setToken: setTokenAndFetchUser };
 }

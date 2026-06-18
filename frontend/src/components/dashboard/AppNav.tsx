@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/dashboard", label: "재고 현황" },
   { href: "/menus", label: "메뉴·레시피" },
   { href: "/sales", label: "판매 입력" },
+  { href: "/settings", label: "설정" },
 ];
 
 export function AppNav() {

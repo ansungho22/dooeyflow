@@ -1,17 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { EditMaterialModal } from "@/components/dashboard/EditMaterialModal";
 import { cn } from "@/lib/cn";
 import { formatQuantity } from "@/lib/format";
 import type { Material } from "@/lib/types";
 
 interface MaterialListProps {
+  storeId: number;
   materials: Material[];
   onDelete: (materialId: number) => Promise<void>;
+  onUpdated: (material: Material) => void;
 }
 
-export function MaterialList({ materials, onDelete }: MaterialListProps) {
+export function MaterialList({
+  storeId,
+  materials,
+  onDelete,
+  onUpdated,
+}: MaterialListProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
 
   if (materials.length === 0) {
     return (
@@ -59,9 +68,13 @@ export function MaterialList({ materials, onDelete }: MaterialListProps) {
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* 현재고 / 안전재고 (단위 한 번만 표기) */}
-              <div className="flex items-baseline gap-1 whitespace-nowrap">
+              <button
+                type="button"
+                onClick={() => setEditingMaterial(material)}
+                className="flex items-baseline gap-1 whitespace-nowrap rounded-md px-2 py-1 transition-colors hover:bg-accent-soft"
+              >
                 <span
                   className={cn(
                     "tabular text-xl font-bold",
@@ -73,7 +86,7 @@ export function MaterialList({ materials, onDelete }: MaterialListProps) {
                 <span className="tabular text-sm text-text-subtle">
                   / {formatQuantity(material.safety_stock)} {material.unit}
                 </span>
-              </div>
+              </button>
 
               <button
                 type="button"
@@ -95,6 +108,15 @@ export function MaterialList({ materials, onDelete }: MaterialListProps) {
           </li>
         ))}
       </ul>
+
+      {editingMaterial && (
+        <EditMaterialModal
+          storeId={storeId}
+          material={editingMaterial}
+          onClose={() => setEditingMaterial(null)}
+          onUpdated={onUpdated}
+        />
+      )}
     </div>
   );
 }

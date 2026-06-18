@@ -43,6 +43,14 @@ export default function DashboardPage() {
     setMaterials((prev) => prev.filter((m) => m.id !== materialId));
   }
 
+  function handleMaterialUpdated(updated: Material): void {
+    setMaterials((prev) =>
+      prev
+        .map((m) => (m.id === updated.id ? updated : m))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    );
+  }
+
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-5 py-6">
       <section className="grid grid-cols-2 gap-3">
@@ -74,7 +82,12 @@ export default function DashboardPage() {
         {loading ? (
           <p className="px-1 text-sm text-text-subtle">불러오는 중…</p>
         ) : (
-          <MaterialList materials={materials} onDelete={handleDelete} />
+          <MaterialList
+            storeId={store.id}
+            materials={materials}
+            onDelete={handleDelete}
+            onUpdated={handleMaterialUpdated}
+          />
         )}
       </section>
     </main>

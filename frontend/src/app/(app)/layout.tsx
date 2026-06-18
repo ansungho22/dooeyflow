@@ -23,6 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     loading: storeLoading,
     selectStore,
     addStore,
+    refresh,
   } = useStore(Boolean(user));
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <StoreContextProvider value={{ store: activeStore, refreshTrigger: 0 }}>
+    <StoreContextProvider value={{ store: activeStore, refreshTrigger: 0, refresh }}>
       <div className="min-h-dvh">
         <DashboardHeader
           store={activeStore}
