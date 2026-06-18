@@ -1,5 +1,6 @@
 "use client";
 
+import { AppNav } from "@/components/dashboard/AppNav";
 import { Button } from "@/components/ui/Button";
 import type { Store } from "@/lib/types";
 
@@ -18,7 +19,7 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3.5">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-3">
         <div className="flex items-center gap-3">
           <span className="text-sm font-bold text-accent">Dooeyflow</span>
           {stores.length > 1 ? (
@@ -28,6 +29,7 @@ export function DashboardHeader({
                 const next = stores.find((s) => s.id === Number(e.target.value));
                 if (next) onSelectStore(next);
               }}
+              aria-label="매장 선택"
               className="rounded border border-border bg-surface-raised px-2.5 py-1.5 text-sm font-semibold focus:border-accent focus:outline-none"
             >
               {stores.map((s) => (
@@ -40,6 +42,7 @@ export function DashboardHeader({
             <span className="text-sm font-semibold">{store.name}</span>
           )}
         </div>
+        <AppNav />
         <Button variant="ghost" onClick={onLogout} className="px-3 py-1.5">
           로그아웃
         </Button>

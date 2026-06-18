@@ -5,6 +5,7 @@ import type {
   BatchSaleResult,
   Material,
   Menu,
+  Recipe,
   SaleLine,
   Store,
   User,
@@ -125,6 +126,51 @@ export async function createMaterial(
 
 export async function listMenus(storeId: number): Promise<Menu[]> {
   return request<Menu[]>(`/api/v1/stores/${storeId}/menus`);
+}
+
+export async function createMenu(
+  storeId: number,
+  data: { name: string; price: string; pos_menu_code?: string | null },
+): Promise<Menu> {
+  return request<Menu>(`/api/v1/stores/${storeId}/menus`, {
+    method: "POST",
+    body: JSON.stringify({
+      name: data.name,
+      price: data.price,
+      pos_menu_code: data.pos_menu_code ?? null,
+    }),
+  });
+}
+
+// --- 레시피 (BOM) ---
+
+export async function listRecipes(
+  storeId: number,
+  menuId: number,
+): Promise<Recipe[]> {
+  return request<Recipe[]>(`/api/v1/stores/${storeId}/menus/${menuId}/recipes`);
+}
+
+export async function addRecipeItem(
+  storeId: number,
+  menuId: number,
+  data: { material_id: number; quantity_per_unit: string },
+): Promise<Recipe> {
+  return request<Recipe>(`/api/v1/stores/${storeId}/menus/${menuId}/recipes`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteRecipeItem(
+  storeId: number,
+  menuId: number,
+  recipeId: number,
+): Promise<void> {
+  return request<void>(
+    `/api/v1/stores/${storeId}/menus/${menuId}/recipes/${recipeId}`,
+    { method: "DELETE" },
+  );
 }
 
 // --- 재고 차감 ---
