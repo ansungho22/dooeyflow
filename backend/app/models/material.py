@@ -27,3 +27,8 @@ class Material(Base, TimestampMixin):
     safety_stock: Mapped[Decimal] = mapped_column(
         Numeric(QUANTITY_PRECISION, QUANTITY_SCALE), default=Decimal("0"), nullable=False
     )
+
+    @property
+    def is_low_stock(self) -> bool:
+        """현재 재고가 안전 재고 이하인지 여부 (알림 트리거 판단용)."""
+        return self.current_stock <= self.safety_stock
