@@ -35,6 +35,8 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+# str+Enum 패턴은 SQLAlchemy Enum 매핑과의 명시적 호환을 위해 의도적으로 유지
+ignore = ["UP042"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
