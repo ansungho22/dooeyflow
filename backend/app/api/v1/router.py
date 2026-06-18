@@ -8,6 +8,7 @@ from app.api.v1.routes import (
     materials,
     menus,
     notifications,
+    polling,
     webhooks,
 )
 
@@ -17,4 +18,5 @@ api_router.include_router(materials.router)
 api_router.include_router(menus.router)
 api_router.include_router(inventory.router)
 api_router.include_router(notifications.router)
+api_router.include_router(polling.router)
 api_router.include_router(webhooks.router)
