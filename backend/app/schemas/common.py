@@ -1,6 +1,6 @@
 """공통 API 응답 스키마."""
 
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel
 
