@@ -16,6 +16,7 @@ const config: Config = {
         text: {
           DEFAULT: "var(--color-text)",
           muted: "var(--color-text-muted)",
+          subtle: "var(--color-text-subtle)",
         },
         accent: {
           DEFAULT: "var(--color-accent)",

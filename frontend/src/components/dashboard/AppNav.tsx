@@ -22,13 +22,14 @@ export function AppNav() {
             href={link.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "rounded px-3 py-1.5 text-sm font-semibold transition-colors",
-              active
-                ? "bg-accent-soft text-accent-strong"
-                : "text-text-muted hover:text-text hover:bg-surface-sunken",
+              "relative px-3 py-2.5 text-sm font-bold transition-colors",
+              active ? "text-accent" : "text-text-subtle hover:text-text",
             )}
           >
             {link.label}
+            {active && (
+              <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-accent" />
+            )}
           </Link>
         );
       })}

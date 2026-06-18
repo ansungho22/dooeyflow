@@ -111,7 +111,7 @@ export default function LoginPage() {
             </p>
           )}
 
-          <Button type="submit" disabled={submitting} className="w-full">
+          <Button type="submit" size="lg" disabled={submitting} className="w-full">
             {submitting
               ? "처리 중…"
               : mode === "login"

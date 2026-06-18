@@ -4,23 +4,25 @@ import { cn } from "@/lib/cn";
 interface StatCardProps {
   label: string;
   value: string | number;
+  unit?: string;
   tone?: "default" | "danger";
-  hint?: string;
 }
 
-export function StatCard({ label, value, tone = "default", hint }: StatCardProps) {
+export function StatCard({ label, value, unit, tone = "default" }: StatCardProps) {
   return (
-    <Card className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-text-muted">{label}</span>
-      <span
-        className={cn(
-          "tabular text-stat font-bold leading-none",
-          tone === "danger" ? "text-danger" : "text-text",
-        )}
-      >
-        {value}
+    <Card className="flex flex-col gap-2">
+      <span className="text-[13px] font-semibold text-text-muted">{label}</span>
+      <span className="flex items-baseline gap-1">
+        <span
+          className={cn(
+            "tabular text-stat font-bold leading-none",
+            tone === "danger" ? "text-danger" : "text-text",
+          )}
+        >
+          {value}
+        </span>
+        {unit && <span className="text-sm font-medium text-text-subtle">{unit}</span>}
       </span>
-      {hint && <span className="mt-1 text-xs text-text-muted">{hint}</span>}
     </Card>
   );
 }

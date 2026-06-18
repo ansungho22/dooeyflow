@@ -1,64 +1,98 @@
+"use client";
+
+import { useState } from "react";
 import { cn } from "@/lib/cn";
 import { formatQuantity } from "@/lib/format";
 import type { Material } from "@/lib/types";
 
 interface MaterialListProps {
   materials: Material[];
+  onDelete: (materialId: number) => Promise<void>;
 }
 
-export function MaterialList({ materials }: MaterialListProps) {
+export function MaterialList({ materials, onDelete }: MaterialListProps) {
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
   if (materials.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-border bg-surface-sunken px-6 py-12 text-center">
-        <p className="text-sm text-text-muted">
+      <div className="rounded-lg bg-surface-raised px-6 py-14 text-center shadow-card">
+        <p className="text-sm text-text-subtle">
           아직 등록된 원자재가 없습니다. 위에서 추가해 보세요.
         </p>
       </div>
     );
   }
 
-  return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface-raised shadow-card">
-      <div className="flex items-center justify-between border-b border-border bg-surface-sunken px-5 py-2">
-        <span className="text-xs font-medium text-text-muted">원자재</span>
-        <span className="text-xs font-medium text-text-muted">현재고 / 안전재고</span>
-      </div>
-      <ul className="divide-y divide-border">
-        {materials.map((material) => (
-        <li
-          key={material.id}
-          className={cn(
-            "flex items-center justify-between gap-4 px-5 py-4 transition-colors",
-            material.is_low_stock && "bg-danger-soft/60",
-          )}
-        >
-          <div className="flex min-w-0 items-center gap-2">
-            <p className="truncate font-semibold">{material.name}</p>
-            {material.is_low_stock && (
-              <span className="shrink-0 rounded-full bg-danger px-2 py-0.5 text-xs font-bold text-white">
-                부족
-              </span>
-            )}
-          </div>
+  async function handleDelete(material: Material): Promise<void> {
+    if (!window.confirm(`'${material.name}'을(를) 삭제할까요?`)) return;
+    setDeletingId(material.id);
+    try {
+      await onDelete(material.id);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
-          {/* 현재고 / 안전재고 분수 형태 (예: 3 / 2 g) */}
-          <div className="flex items-baseline gap-1 whitespace-nowrap">
-            <span
-              className={cn(
-                "tabular text-lg font-bold",
-                material.is_low_stock ? "text-danger" : "text-text",
-              )}
-            >
-              {formatQuantity(material.current_stock)}
-            </span>
-            <span className="tabular text-sm text-text-muted">
-              / {formatQuantity(material.safety_stock)}
-            </span>
-            {material.unit && (
-              <span className="ml-0.5 text-sm text-text-muted">{material.unit}</span>
+  return (
+    <div className="overflow-hidden rounded-lg bg-surface-raised shadow-card">
+      <div className="flex items-center justify-between px-5 pb-2 pt-4">
+        <span className="text-xs font-semibold text-text-subtle">원자재</span>
+        <span className="text-xs font-semibold text-text-subtle">
+          현재고 / 안전재고
+        </span>
+      </div>
+      <ul>
+        {materials.map((material) => (
+          <li
+            key={material.id}
+            className={cn(
+              "group flex items-center justify-between gap-3 border-t border-border px-5 py-4",
+              material.is_low_stock && "bg-danger-soft/40",
             )}
-          </div>
-        </li>
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="truncate font-semibold">{material.name}</span>
+              {material.is_low_stock && (
+                <span className="shrink-0 rounded-md bg-danger px-1.5 py-0.5 text-[11px] font-bold text-white">
+                  부족
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* 현재고 / 안전재고 (단위 한 번만 표기) */}
+              <div className="flex items-baseline gap-1 whitespace-nowrap">
+                <span
+                  className={cn(
+                    "tabular text-xl font-bold",
+                    material.is_low_stock ? "text-danger" : "text-text",
+                  )}
+                >
+                  {formatQuantity(material.current_stock)}
+                </span>
+                <span className="tabular text-sm text-text-subtle">
+                  / {formatQuantity(material.safety_stock)} {material.unit}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleDelete(material)}
+                disabled={deletingId === material.id}
+                aria-label={`${material.name} 삭제`}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-text-subtle transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+              >
+                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
+                  <path
+                    d="M5 5l10 10M15 5L5 15"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </li>
         ))}
       </ul>
     </div>

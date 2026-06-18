@@ -63,61 +63,69 @@ export default function SalesPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl space-y-7 px-5 py-7">
-      <div>
+    <main className="mx-auto max-w-2xl space-y-6 px-5 py-6">
+      <div className="px-1">
         <h2 className="text-heading font-bold">판매 일괄 입력</h2>
         <p className="mt-1 text-sm text-text-muted">
-          장사 마감 후 메뉴별 판매 수량을 입력하면 레시피대로 재고가 자동 차감됩니다.
+          마감 후 메뉴별 판매 수량을 입력하면 레시피대로 재고가 자동 차감됩니다.
         </p>
       </div>
 
       {loading ? (
-        <p className="text-sm text-text-muted">불러오는 중…</p>
+        <p className="px-1 text-sm text-text-subtle">불러오는 중…</p>
       ) : menus.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border bg-surface-sunken px-6 py-12 text-center text-sm text-text-muted">
+        <div className="rounded-lg bg-surface-raised px-6 py-14 text-center text-sm text-text-subtle shadow-card">
           먼저 메뉴·레시피를 등록해 주세요.
         </div>
       ) : (
         <>
-          <Card className="divide-y divide-border p-0">
-            {menus.map((menu) => (
+          <Card className="p-0">
+            {menus.map((menu, idx) => (
               <div
                 key={menu.id}
-                className="flex items-center justify-between gap-4 px-5 py-3.5"
+                className={`flex items-center justify-between gap-4 px-5 py-4 ${
+                  idx > 0 ? "border-t border-border" : ""
+                }`}
               >
-                <div>
-                  <p className="font-semibold">{menu.name}</p>
-                  <p className="text-xs text-text-muted">{formatWon(menu.price)}</p>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{menu.name}</p>
+                  <p className="tabular text-xs text-text-subtle">
+                    {formatWon(menu.price)}
+                  </p>
                 </div>
                 <input
                   type="number"
                   min="0"
                   inputMode="numeric"
+                  autoComplete="off"
                   value={quantities[menu.id] || ""}
                   onChange={(e) => setQuantity(menu.id, e.target.value)}
                   placeholder="0"
                   aria-label={`${menu.name} 판매 수량`}
-                  className="tabular w-24 rounded border border-border bg-surface-raised px-3 py-2 text-right focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  className="tabular w-24 rounded bg-surface-sunken px-3 py-2.5 text-right text-lg font-bold focus:bg-surface-raised focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
             ))}
           </Card>
 
           {error && (
-            <p className="rounded bg-danger-soft px-3 py-2 text-sm text-danger">
+            <p className="rounded bg-danger-soft px-4 py-3 text-sm font-medium text-danger">
               {error}
             </p>
           )}
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-text-muted">
-              {totalItems > 0 ? `총 ${totalItems}잔 차감 예정` : "수량을 입력하세요"}
-            </span>
+          <div className="sticky bottom-4 space-y-2">
             <Button
               onClick={handleSubmit}
+              size="lg"
               disabled={submitting || lines.length === 0}
+              className="w-full shadow-card"
             >
-              {submitting ? "차감 중…" : "재고 차감"}
+              {submitting
+                ? "차감 중…"
+                : totalItems > 0
+                  ? `${totalItems}잔 재고 차감`
+                  : "수량을 입력하세요"}
             </Button>
           </div>
 
