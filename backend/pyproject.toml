@@ -47,3 +47,5 @@ addopts = "--cov=app --cov-report=term-missing"
 
 [tool.coverage.run]
 omit = ["app/main.py", "alembic/*", "tests/*"]
+# SQLAlchemy 2.0 async는 DB I/O를 greenlet에서 실행하므로 추적을 위해 필요
+concurrency = ["greenlet", "thread"]
