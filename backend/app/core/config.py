@@ -32,6 +32,13 @@ class Settings(BaseSettings):
     # 토스 웹훅 서명 검증
     toss_webhook_secret: str = Field(default="")
 
+    # CORS 허용 출처 (쉼표 구분). 개발 시 프론트엔드 dev 서버 허용.
+    cors_origins: str = Field(default="http://localhost:3000")
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
 
 @lru_cache
 def get_settings() -> Settings:
