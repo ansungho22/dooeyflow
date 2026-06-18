@@ -1,0 +1,25 @@
+{
+  "name": "dooeyflow-harness",
+  "displayName": "Dooeyflow Harness",
+  "description": "요식업 재고관리 앱 멀티에이전트 개발 환경",
+  "version": "1.0",
+  "workspace": {
+    "name": "dooeyflow",
+    "description": "요식업 재고관리 앱 멀티에이전트 개발 환경",
+    "strict_mode": true
+  },
+  "permissions": {
+    "file_read": ["*"],
+    "file_write": ["*"],
+    "blocked_paths": [
+      ".agents/**",
+      ".claude/**",
+      ".gemini/**"
+    ],
+    "execute_commands": true
+  },
+  "default_model": "gemini-3.1-pro",
+  "hooks": {
+    "post_task": "./.agents/hooks/post-task.sh"
+  }
+}
