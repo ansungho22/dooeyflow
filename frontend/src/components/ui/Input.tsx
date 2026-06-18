@@ -1,28 +1,40 @@
 import { cn } from "@/lib/cn";
-import type { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  hint?: string;
+  suffix?: ReactNode;
 }
 
-export function Input({ label, className, id, ...props }: InputProps) {
+export function Input({ label, hint, suffix, className, id, ...props }: InputProps) {
   return (
     <label className="block">
       {label && (
-        <span className="mb-1.5 block text-sm font-medium text-text-muted">
+        <span className="mb-1.5 block text-[13px] font-semibold text-text-muted">
           {label}
         </span>
       )}
-      <input
-        id={id}
-        className={cn(
-          "w-full rounded border border-border bg-surface-raised px-3.5 py-2.5",
-          "text-text placeholder:text-text-muted/60",
-          "transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30",
-          className,
+      <div className="relative flex items-center">
+        <input
+          id={id}
+          className={cn(
+            "w-full rounded bg-surface-sunken px-4 py-3 text-text",
+            "placeholder:text-text-subtle",
+            "border border-transparent transition-colors",
+            "focus:border-accent focus:bg-surface-raised focus:outline-none",
+            suffix ? "pr-12" : "",
+            className,
+          )}
+          {...props}
+        />
+        {suffix && (
+          <span className="pointer-events-none absolute right-4 text-sm font-medium text-text-subtle">
+            {suffix}
+          </span>
         )}
-        {...props}
-      />
+      </div>
+      {hint && <p className="mt-1.5 text-xs text-text-subtle">{hint}</p>}
     </label>
   );
 }

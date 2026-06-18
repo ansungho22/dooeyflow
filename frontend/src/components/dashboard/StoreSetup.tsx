@@ -38,12 +38,13 @@ export function StoreSetup({ onCreate }: StoreSetupProps) {
           <Input
             label="매장 이름"
             required
+            autoComplete="off"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="으뜸 카페 강남점"
           />
           {error && <p className="text-sm text-danger">{error}</p>}
-          <Button type="submit" disabled={submitting} className="w-full">
+          <Button type="submit" size="lg" disabled={submitting} className="w-full">
             {submitting ? "생성 중…" : "매장 만들기"}
           </Button>
         </form>

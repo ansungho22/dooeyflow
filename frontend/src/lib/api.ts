@@ -122,6 +122,15 @@ export async function createMaterial(
   });
 }
 
+export async function deleteMaterial(
+  storeId: number,
+  materialId: number,
+): Promise<void> {
+  return request<void>(`/api/v1/stores/${storeId}/materials/${materialId}`, {
+    method: "DELETE",
+  });
+}
+
 // --- 메뉴 ---
 
 export async function listMenus(storeId: number): Promise<Menu[]> {
