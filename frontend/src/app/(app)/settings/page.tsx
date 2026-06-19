@@ -7,12 +7,22 @@ import { Input } from "@/components/ui/Input";
 import { ApiError, updateStore } from "@/lib/api";
 import { useActiveStore, useStoreRefresh } from "@/lib/StoreContext";
 
+const WEBHOOK_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"}/api/v1/webhooks/toss`;
+
 export default function SettingsPage() {
   const store = useActiveStore();
   const refreshStore = useStoreRefresh();
 
   const [name, setName] = useState(store.name);
   const [tossEnabled, setTossEnabled] = useState(store.toss_enabled);
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy(): void {
+    navigator.clipboard.writeText(WEBHOOK_URL).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +59,7 @@ export default function SettingsPage() {
             placeholder="카페 이름"
           />
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="flex items-center gap-3">
               <input
                 type="checkbox"
@@ -64,6 +74,29 @@ export default function SettingsPage() {
                 </p>
               </div>
             </label>
+
+            {tossEnabled && (
+              <div className="rounded-lg border border-accent/30 bg-accent-soft p-4 space-y-3">
+                <p className="text-sm font-semibold text-accent-strong">토스 POS 웹훅 설정 방법</p>
+                <ol className="text-sm text-text-subtle space-y-1 list-decimal list-inside">
+                  <li>토스 POS 관리자 → 설정 → 웹훅으로 이동</li>
+                  <li>아래 URL을 웹훅 엔드포인트로 등록</li>
+                  <li>이벤트 유형: <span className="font-mono text-xs bg-surface px-1 py-0.5 rounded">PAYMENT_STATUS_CHANGED</span> 선택</li>
+                </ol>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 rounded-md bg-surface px-3 py-2 text-xs font-mono text-text break-all border border-border">
+                    {WEBHOOK_URL}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="shrink-0 rounded-md bg-accent px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-accent/90"
+                  >
+                    {copied ? "복사됨 ✓" : "복사"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {error && <p className="text-sm text-danger">{error}</p>}

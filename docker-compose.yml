@@ -29,6 +29,9 @@ services:
     build: ./backend
     env_file:
       - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://dooeyflow:dooeyflow@db:5432/dooeyflow
+      - REDIS_URL=redis://redis:6379/0
     ports:
       - "8000:8000"
     volumes:
@@ -38,6 +41,18 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - backend
 
 volumes:
   pgdata:

@@ -15,9 +15,9 @@ interface UnitDef {
 // 입력 단위 → 기본 단위 정의
 const UNIT_DEFS: Record<string, UnitDef> = {
   g: { label: "g", base: "g", shift: 0 },
-  kg: { label: "kg (→g 저장)", base: "g", shift: 3 },
+  kg: { label: "kg", base: "g", shift: 3 },
   ml: { label: "ml", base: "ml", shift: 0 },
-  L: { label: "L (→ml 저장)", base: "ml", shift: 3 },
+  L: { label: "L", base: "ml", shift: 3 },
   개: { label: "개", base: "개", shift: 0 },
   병: { label: "병", base: "병", shift: 0 },
   캔: { label: "캔", base: "캔", shift: 0 },
