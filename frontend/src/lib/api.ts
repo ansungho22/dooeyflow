@@ -242,6 +242,16 @@ export async function registerDeviceToken(
   });
 }
 
+// --- 재고 이력 ---
+
+export async function listTransactions(
+  storeId: number,
+  materialId?: number,
+): Promise<import("@/lib/types").InventoryTransaction[]> {
+  const params = materialId ? `?material_id=${materialId}` : "";
+  return request(`/api/v1/stores/${storeId}/inventory/transactions${params}`);
+}
+
 // --- 재고 차감 ---
 
 export async function batchSale(

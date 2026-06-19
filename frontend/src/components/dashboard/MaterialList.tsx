@@ -5,6 +5,7 @@ import { EditMaterialModal } from "@/components/dashboard/EditMaterialModal";
 import { cn } from "@/lib/cn";
 import { formatQuantity } from "@/lib/format";
 import type { Material } from "@/lib/types";
+import { formatForDisplay, getDisplayUnit } from "@/lib/units";
 
 interface MaterialListProps {
   storeId: number;
@@ -81,10 +82,10 @@ export function MaterialList({
                     material.is_low_stock ? "text-danger" : "text-text",
                   )}
                 >
-                  {formatQuantity(material.current_stock)}
+                  {formatQuantity(formatForDisplay(material.current_stock, material.unit))}
                 </span>
                 <span className="tabular text-sm text-text-subtle">
-                  / {formatQuantity(material.safety_stock)} {material.unit}
+                  / {formatQuantity(formatForDisplay(material.safety_stock, material.unit))} {getDisplayUnit(material.unit)}
                 </span>
               </button>
 

@@ -25,6 +25,7 @@ class MaterialStockChange(BaseModel):
 
     material_id: int
     material_name: str
+    unit: str
     consumed: Decimal
     remaining_stock: Decimal
     is_low_stock: bool

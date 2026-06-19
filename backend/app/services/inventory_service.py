@@ -96,6 +96,7 @@ async def process_batch_sale(
             MaterialStockChange(
                 material_id=material_id,
                 material_name=material.name,
+                unit=material.unit,
                 consumed=consumed,
                 remaining_stock=material.current_stock,
                 is_low_stock=material.is_low_stock,
@@ -144,6 +145,6 @@ async def list_transactions(
     )
     if material_id is not None:
         query = query.where(InventoryTransaction.material_id == material_id)
-    query = query.order_by(InventoryTransaction.id.desc())
+    query = query.order_by(InventoryTransaction.id.desc()).limit(100)
     result = await db.execute(query)
     return list(result.scalars().all())

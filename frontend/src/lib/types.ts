@@ -52,9 +52,19 @@ export interface SaleLine {
 export interface MaterialStockChange {
   material_id: number;
   material_name: string;
+  unit: string;
   consumed: string;
   remaining_stock: string;
   is_low_stock: boolean;
+}
+
+export interface InventoryTransaction {
+  id: number;
+  material_id: number;
+  quantity_changed: string;
+  reason_code: "SALE" | "WASTE" | "AUDIT" | "CANCEL";
+  actor_id: number | null;
+  reference: string | null;
 }
 
 export interface BatchSaleResult {

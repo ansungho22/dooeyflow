@@ -30,3 +30,12 @@ export function useStoreRefresh(): () => Promise<void> {
   }
   return ctx.refresh;
 }
+
+/** 재고/매장 갱신 횟수 (하위 컴포넌트에서 useEffect 의존성으로 활용). */
+export function useRefreshTrigger(): number {
+  const ctx = useContext(StoreContext);
+  if (ctx === null) {
+    throw new Error("useRefreshTrigger must be used within the app layout");
+  }
+  return ctx.refreshTrigger;
+}
