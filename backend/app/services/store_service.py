@@ -4,11 +4,20 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.store import Store
-from app.schemas.store import StoreUpdate
+from app.schemas.store import StoreCreate, StoreUpdate
 
 
 class StoreNotFound(Exception):
     pass
+
+
+async def create_store(db: AsyncSession, owner_id: int, payload: StoreCreate) -> Store:
+    """새 매장을 생성한다."""
+    store = Store(owner_id=owner_id, name=payload.name, toss_enabled=payload.toss_enabled)
+    db.add(store)
+    await db.commit()
+    await db.refresh(store)
+    return store
 
 
 async def get_store(db: AsyncSession, owner_id: int, store_id: int) -> Store:

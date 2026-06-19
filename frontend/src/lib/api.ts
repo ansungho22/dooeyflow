@@ -110,11 +110,11 @@ export async function getOAuthUrl(provider: OAuthProvider): Promise<OAuthStartRe
 // --- 매장 ---
 
 export async function listStores(): Promise<Store[]> {
-  return request<Store[]>("/api/v1/auth/stores");
+  return request<Store[]>("/api/v1/stores");
 }
 
 export async function createStore(name: string): Promise<Store> {
-  return request<Store>("/api/v1/auth/stores", {
+  return request<Store>("/api/v1/stores", {
     method: "POST",
     body: JSON.stringify({ name }),
   });

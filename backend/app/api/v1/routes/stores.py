@@ -8,13 +8,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user
 from app.core.database import get_db
 from app.models.user import User
-from app.schemas.store import StoreRead, StoreUpdate
+from app.schemas.store import StoreCreate, StoreRead, StoreUpdate
 from app.services import store_service
 
 router = APIRouter(prefix="/stores", tags=["stores"])
 
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+@router.post("", response_model=StoreRead, status_code=status.HTTP_201_CREATED)
+async def create_store(
+    payload: StoreCreate, user: CurrentUser, db: DbSession
+) -> StoreRead:
+    """새 매장을 생성한다."""
+    store = await store_service.create_store(db, user.id, payload)
+    return StoreRead.model_validate(store)
 
 
 @router.get("", response_model=list[StoreRead])

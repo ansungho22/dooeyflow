@@ -50,9 +50,14 @@ async def update_material(
     db: AsyncSession, store_id: int, material_id: int, payload: MaterialUpdate
 ) -> Material:
     material = await get_material(db, store_id, material_id)
-    data = payload.model_dump(exclude_unset=True)
-    for field, value in data.items():
-        setattr(material, field, value)
+    if payload.name is not None:
+        material.name = payload.name
+    if payload.unit is not None:
+        material.unit = payload.unit
+    if payload.current_stock is not None:
+        material.current_stock = payload.current_stock
+    if payload.safety_stock is not None:
+        material.safety_stock = payload.safety_stock
     await db.commit()
     await db.refresh(material)
     return material

@@ -1,4 +1,4 @@
-"""인증/온보딩 라우터: 회원가입, 로그인, 내 정보, 매장 생성/조회."""
+"""인증 라우터: 회원가입, 로그인, 내 정보."""
 
 from typing import Annotated
 
@@ -8,14 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import CurrentUser
 from app.core.database import get_db
 from app.core.security import create_access_token
-from app.schemas.auth import (
-    LoginRequest,
-    StoreCreate,
-    StoreRead,
-    Token,
-    UserCreate,
-    UserRead,
-)
+from app.schemas.auth import LoginRequest, Token, UserCreate, UserRead
 from app.services import auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -46,17 +39,3 @@ async def login(payload: LoginRequest, db: DbSession) -> Token:
 @router.get("/me", response_model=UserRead)
 async def read_me(current_user: CurrentUser) -> UserRead:
     return UserRead.model_validate(current_user)
-
-
-@router.post("/stores", response_model=StoreRead, status_code=status.HTTP_201_CREATED)
-async def create_store(
-    payload: StoreCreate, current_user: CurrentUser, db: DbSession
-) -> StoreRead:
-    store = await auth_service.create_store(db, current_user, payload)
-    return StoreRead.model_validate(store)
-
-
-@router.get("/stores", response_model=list[StoreRead])
-async def list_stores(current_user: CurrentUser, db: DbSession) -> list[StoreRead]:
-    stores = await auth_service.list_stores(db, current_user)
-    return [StoreRead.model_validate(s) for s in stores]

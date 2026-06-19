@@ -24,6 +24,8 @@ from app.schemas.inventory import (
     StockAdjustment,
 )
 
+TRANSACTION_LIST_LIMIT = 100
+
 
 class DeductionError(Exception):
     """재고 차감 도메인 오류."""
@@ -44,20 +46,28 @@ async def _aggregate_consumption(
 
     메뉴/레시피가 모두 같은 매장 소속인지 검증하며, 위반 시 예외로 전체 차단한다.
     """
-    consumption: dict[int, Decimal] = defaultdict(lambda: Decimal("0"))
+    menu_ids = [line.menu_id for line in request.lines]
+
+    # 메뉴 배치 로드 (N+1 방지)
+    menu_rows = await db.execute(select(Menu).where(Menu.id.in_(menu_ids)))
+    menus: dict[int, Menu] = {m.id: m for m in menu_rows.scalars().all()}
 
     for line in request.lines:
-        menu = await db.get(Menu, line.menu_id)
+        menu = menus.get(line.menu_id)
         if menu is None or menu.store_id != store_id:
             raise MenuNotInStore(f"메뉴 {line.menu_id}를 찾을 수 없습니다.")
 
-        result = await db.execute(select(Recipe).where(Recipe.menu_id == line.menu_id))
-        recipes = result.scalars().all()
-        for recipe in recipes:
-            # 소비량 = 메뉴당 소모량 × 판매 수량 (Decimal 정밀 연산)
-            consumption[recipe.material_id] += recipe.quantity_per_unit * Decimal(
-                line.quantity_sold
-            )
+    # 레시피 배치 로드 (N+1 방지)
+    recipe_rows = await db.execute(select(Recipe).where(Recipe.menu_id.in_(menu_ids)))
+    recipes = recipe_rows.scalars().all()
+
+    qty_by_menu = {line.menu_id: line.quantity_sold for line in request.lines}
+    consumption: dict[int, Decimal] = defaultdict(lambda: Decimal("0"))
+    for recipe in recipes:
+        # 소비량 = 메뉴당 소모량 × 판매 수량 (Decimal 정밀 연산)
+        consumption[recipe.material_id] += recipe.quantity_per_unit * Decimal(
+            qty_by_menu[recipe.menu_id]
+        )
 
     return consumption
 
@@ -75,9 +85,15 @@ async def process_batch_sale(
     """
     consumption = await _aggregate_consumption(db, store_id, request)
 
+    # 원자재 배치 로드 (N+1 방지)
+    mat_rows = await db.execute(
+        select(Material).where(Material.id.in_(list(consumption.keys())))
+    )
+    materials: dict[int, Material] = {m.id: m for m in mat_rows.scalars().all()}
+
     changes: list[MaterialStockChange] = []
     for material_id, consumed in consumption.items():
-        material = await db.get(Material, material_id)
+        material = materials.get(material_id)
         if material is None or material.store_id != store_id:
             raise MaterialNotInStore(f"원자재 {material_id}를 찾을 수 없습니다.")
 
@@ -145,6 +161,6 @@ async def list_transactions(
     )
     if material_id is not None:
         query = query.where(InventoryTransaction.material_id == material_id)
-    query = query.order_by(InventoryTransaction.id.desc()).limit(100)
+    query = query.order_by(InventoryTransaction.id.desc()).limit(TRANSACTION_LIST_LIMIT)
     result = await db.execute(query)
     return list(result.scalars().all())

@@ -3,6 +3,11 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class StoreCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=150)
+    toss_enabled: bool = False
+
+
 class StoreUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=150)
     toss_enabled: bool | None = Field(default=None)
