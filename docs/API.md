@@ -45,6 +45,95 @@ http://localhost:8000/api/v1
 }
 ```
 
+### GET `/api/v1/auth/me`
+현재 로그인 사용자 정보 조회
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+{
+  "id": 1,
+  "email": "user@example.com",
+  "full_name": "홍길동",
+  "auth_provider": null,
+  "is_active": true
+}
+```
+
+### POST `/api/v1/auth/stores`
+매장 생성
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "name": "나의 카페",
+  "toss_enabled": false
+}
+```
+
+### GET `/api/v1/auth/stores`
+내 매장 목록 조회
+
+**Headers:** `Authorization: Bearer <token>`
+
+---
+
+## 소셜 로그인 (OAuth)
+
+카카오·네이버·Apple 소셜 로그인을 지원합니다. `{provider}` 값: `kakao`, `naver`, `apple`
+
+### GET `/api/v1/oauth/{provider}/start`
+소셜 로그인 시작 — OAuth 인증 URL 반환
+
+**Response:**
+```json
+{
+  "authorization_url": "https://kauth.kakao.com/oauth/authorize?...",
+  "state": "random-state-string"
+}
+```
+
+> 클라이언트는 `authorization_url`로 리다이렉트합니다.
+
+### GET `/api/v1/oauth/{provider}/callback`
+소셜 로그인 콜백 처리
+
+**Query Parameters:**
+- `code` (required): 소셜 제공자로부터 받은 인증 코드
+- `state` (optional): CSRF 방지용 state 값
+
+> 인증 성공 시 프론트엔드로 리다이렉트하며 URL에 `access_token`이 포함됩니다.
+
+---
+
+## 매장 관리 (Stores)
+
+### GET `/api/v1/stores`
+내 매장 목록 조회
+
+**Headers:** `Authorization: Bearer <token>`
+
+### GET `/api/v1/stores/{store_id}`
+특정 매장 정보 조회
+
+**Headers:** `Authorization: Bearer <token>`
+
+### PATCH `/api/v1/stores/{store_id}`
+매장 정보 수정
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body (모두 선택):**
+```json
+{
+  "name": "새 매장명",
+  "toss_enabled": true
+}
+```
+
 ---
 
 ## 원자재 (Materials)
