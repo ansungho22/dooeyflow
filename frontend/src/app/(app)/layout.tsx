@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StoreSetup } from "@/components/dashboard/StoreSetup";
@@ -25,6 +25,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     addStore,
     refresh,
   } = useStore(Boolean(user));
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const handleRefresh = useCallback(async () => {
+    await refresh();
+    setRefreshTrigger((n) => n + 1);
+  }, [refresh]);
 
   useEffect(() => {
     if (!authLoading && !user) router.replace("/login");
@@ -48,7 +53,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <StoreContextProvider value={{ store: activeStore, refreshTrigger: 0, refresh }}>
+    <StoreContextProvider value={{ store: activeStore, refreshTrigger, refresh: handleRefresh }}>
       <div className="min-h-dvh">
         <DashboardHeader
           store={activeStore}

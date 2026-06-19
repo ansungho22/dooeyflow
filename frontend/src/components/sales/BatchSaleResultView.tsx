@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/cn";
 import { formatQuantity } from "@/lib/format";
 import type { BatchSaleResult } from "@/lib/types";
+import { formatForDisplay, getDisplayUnit } from "@/lib/units";
 
 interface BatchSaleResultViewProps {
   result: BatchSaleResult;
@@ -39,7 +40,7 @@ export function BatchSaleResultView({ result }: BatchSaleResultViewProps) {
             <span className="font-semibold">{change.material_name}</span>
             <div className="flex items-center gap-3">
               <span className="tabular text-text-subtle">
-                −{formatQuantity(change.consumed)}
+                −{formatQuantity(formatForDisplay(change.consumed, change.unit))}{getDisplayUnit(change.unit)}
               </span>
               <span
                 className={cn(
@@ -47,7 +48,7 @@ export function BatchSaleResultView({ result }: BatchSaleResultViewProps) {
                   change.is_low_stock ? "text-danger" : "text-text",
                 )}
               >
-                {formatQuantity(change.remaining_stock)} 남음
+                {formatQuantity(formatForDisplay(change.remaining_stock, change.unit))}{getDisplayUnit(change.unit)} 남음
               </span>
             </div>
           </li>

@@ -4,13 +4,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddMaterialForm } from "@/components/dashboard/AddMaterialForm";
 import { MaterialList } from "@/components/dashboard/MaterialList";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
 import { Card } from "@/components/ui/Card";
 import { deleteMaterial, listMaterials } from "@/lib/api";
-import { useActiveStore } from "@/lib/StoreContext";
+import { useActiveStore, useRefreshTrigger } from "@/lib/StoreContext";
 import type { Material } from "@/lib/types";
 
 export default function DashboardPage() {
   const store = useActiveStore();
+  const refreshTrigger = useRefreshTrigger();
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -89,6 +91,17 @@ export default function DashboardPage() {
             onUpdated={handleMaterialUpdated}
           />
         )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="px-1 text-heading font-bold">최근 변동 이력</h2>
+        <Card>
+          <TransactionHistory
+            storeId={store.id}
+            materials={materials}
+            refreshTrigger={refreshTrigger}
+          />
+        </Card>
       </section>
     </main>
   );
