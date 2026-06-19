@@ -31,34 +31,50 @@
 - Python 3.11+
 - Node.js 18+
 
-### 로컬 실행
+### Docker Compose로 전체 실행 (권장)
+
+```bash
+# 전체 스택 실행 (db + redis + backend + frontend)
+docker-compose up --build
+
+# 또는 백그라운드 모드
+docker-compose up -d --build
+```
+
+**접속:**
+- 프론트엔드: http://localhost:3000
+- 백엔드 Swagger: http://localhost:8000/docs
+
+### 로컬 수동 실행
 
 ```bash
 # 1. 인프라 실행 (PostgreSQL + Redis)
 docker-compose up -d db redis
 
-# 2. 백엔드
+# 2. 백엔드 (새 터미널)
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env          # 환경 변수 설정
+cp .env.example .env
 alembic upgrade head          # DB 마이그레이션
 uvicorn app.main:app --reload
 
 # 3. 프론트엔드 (새 터미널)
 cd frontend
 npm install
-cp .env.example .env.local    # NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+cp .env.example .env.local
 npm run dev
 ```
 
-### 접속 URL
+### 개발 서버 포트
 
 | 서비스 | URL |
 |--------|-----|
-| 프론트엔드 | http://localhost:3000 |
-| 백엔드 API | http://localhost:8000 |
-| Swagger UI | http://localhost:8000/docs |
+| 프론트엔드 (Next.js) | http://localhost:3000 |
+| 백엔드 API (FastAPI) | http://localhost:8000 |
+| Swagger 문서 | http://localhost:8000/docs |
+| PostgreSQL | localhost:5432 |
+| Redis | localhost:6379 |
 
 ## 문서
 

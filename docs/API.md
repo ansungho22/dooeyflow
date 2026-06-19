@@ -61,24 +61,6 @@ http://localhost:8000/api/v1
 }
 ```
 
-### POST `/api/v1/auth/stores`
-매장 생성
-
-**Headers:** `Authorization: Bearer <token>`
-
-**Request Body:**
-```json
-{
-  "name": "나의 카페",
-  "toss_enabled": false
-}
-```
-
-### GET `/api/v1/auth/stores`
-내 매장 목록 조회
-
-**Headers:** `Authorization: Bearer <token>`
-
 ---
 
 ## 소셜 로그인 (OAuth)
@@ -111,10 +93,47 @@ http://localhost:8000/api/v1
 
 ## 매장 관리 (Stores)
 
+### POST `/api/v1/stores`
+새 매장 생성
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "name": "나의 카페",
+  "toss_enabled": false
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": 1,
+  "name": "나의 카페",
+  "toss_enabled": false,
+  "created_at": "2024-01-01T00:00:00Z",
+  "updated_at": "2024-01-01T00:00:00Z"
+}
+```
+
 ### GET `/api/v1/stores`
 내 매장 목록 조회
 
 **Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "name": "나의 카페",
+    "toss_enabled": false,
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]
+```
 
 ### GET `/api/v1/stores/{store_id}`
 특정 매장 정보 조회
@@ -138,12 +157,12 @@ http://localhost:8000/api/v1
 
 ## 원자재 (Materials)
 
-### GET `/api/v1/materials`
+### GET `/api/v1/stores/{store_id}/materials`
 원자재 목록 조회
 
 **Headers:** `Authorization: Bearer <token>`
 
-### POST `/api/v1/materials`
+### POST `/api/v1/stores/{store_id}/materials`
 원자재 등록
 
 **Request Body:**
@@ -156,20 +175,24 @@ http://localhost:8000/api/v1
 }
 ```
 
-### PATCH `/api/v1/materials/{material_id}`
+**참고**: 단위가 `kg` 또는 `L`이면 자동으로 `g` 또는 `ml`로 변환되어 저장됩니다.
+
+### PATCH `/api/v1/stores/{store_id}/materials/{material_id}`
 원자재 수정
 
-### DELETE `/api/v1/materials/{material_id}`
+### DELETE `/api/v1/stores/{store_id}/materials/{material_id}`
 원자재 삭제
 
 ---
 
-## 메뉴 (Menus)
+## 메뉴 및 레시피 (Menus & Recipes)
 
-### GET `/api/v1/menus`
+### GET `/api/v1/stores/{store_id}/menus`
 메뉴 목록 조회 (레시피 포함)
 
-### POST `/api/v1/menus`
+**Headers:** `Authorization: Bearer <token>`
+
+### POST `/api/v1/stores/{store_id}/menus`
 메뉴 등록
 
 **Request Body:**
@@ -180,27 +203,31 @@ http://localhost:8000/api/v1
 }
 ```
 
-### POST `/api/v1/menus/{menu_id}/recipes`
+### POST `/api/v1/stores/{store_id}/menus/{menu_id}/recipes`
 메뉴에 레시피(BOM) 추가
 
 **Request Body:**
 ```json
 {
   "material_id": 1,
-  "quantity": 18,
-  "unit": "g"
+  "quantity_per_unit": 18,
+  "instructions": "에스프레소 2샷 + 물"
 }
 ```
 
-### DELETE `/api/v1/menus/{menu_id}`
+**참고**: `quantity_per_unit`의 단위는 해당 원자재의 저장 단위를 따릅니다.
+
+### DELETE `/api/v1/stores/{store_id}/menus/{menu_id}`
 메뉴 삭제 (연결된 레시피도 함께 삭제)
 
 ---
 
 ## 재고 (Inventory)
 
-### POST `/api/v1/inventory/batch-sale`
+### POST `/api/v1/stores/{store_id}/inventory/batch-sale`
 수동 일괄 판매 차감
+
+**Headers:** `Authorization: Bearer <token>`
 
 **Request Body:**
 ```json
@@ -212,15 +239,23 @@ http://localhost:8000/api/v1
 }
 ```
 
-### GET `/api/v1/inventory/transactions`
+### GET `/api/v1/stores/{store_id}/inventory/transactions`
 재고 변동 이력 조회
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Query Parameters:**
+- `limit` (optional, default: 50): 조회 건수
+- `offset` (optional, default: 0): 페이지 오프셋
 
 ---
 
 ## 알림 (Notifications)
 
-### POST `/api/v1/notifications/register-token`
+### POST `/api/v1/stores/{store_id}/device-tokens`
 푸시 알림 디바이스 토큰 등록
+
+**Headers:** `Authorization: Bearer <token>`
 
 **Request Body:**
 ```json
@@ -229,6 +264,20 @@ http://localhost:8000/api/v1
   "platform": "ios"
 }
 ```
+
+**플랫폼 종류:**
+- `ios` — APNs (Apple Push Notification service) 토큰
+- `web` — Web Push API subscription
+
+### GET `/api/v1/stores/{store_id}/device-tokens`
+등록된 디바이스 토큰 목록 조회
+
+**Headers:** `Authorization: Bearer <token>`
+
+### DELETE `/api/v1/stores/{store_id}/device-tokens/{token_id}`
+디바이스 토큰 등록 해제
+
+**Headers:** `Authorization: Bearer <token>`
 
 ---
 
@@ -241,12 +290,15 @@ http://localhost:8000/api/v1
 
 ---
 
-## 폴링 (Polling)
+## 토스 POS 연동 (Toss Integration)
 
-### POST `/api/v1/polling/sync`
+### POST `/api/v1/stores/{store_id}/toss/sync`
 토스 폴링 배치 실행 (웹훅 유실 보완)
 
+**Headers:** `Authorization: Bearer <token>`
+
 > 관리자 또는 스케줄러에서 호출하여 누락된 주문을 동기화합니다.
+> 토스 API 요청이 필요하므로 `TOSS_API_KEY` 환경 변수가 설정되어야 합니다.
 
 ---
 
