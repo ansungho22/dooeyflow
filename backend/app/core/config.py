@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -51,6 +51,12 @@ class Settings(BaseSettings):
 
     # 소셜 로그인 공통
     oauth_redirect_base: str = Field(default="http://localhost:3000")
+
+    @model_validator(mode="after")
+    def check_production_secrets(self) -> "Settings":
+        if self.environment == "production" and self.jwt_secret_key == "change-me-in-production":
+            raise ValueError("운영 환경에서 기본 JWT 시크릿 키를 사용할 수 없습니다. JWT_SECRET_KEY 환경변수를 설정하세요.")
+        return self
 
     @property
     def cors_origins_list(self) -> list[str]:

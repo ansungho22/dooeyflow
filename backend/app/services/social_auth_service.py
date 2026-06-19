@@ -163,17 +163,11 @@ async def authenticate_with_code(
     if user:
         return user
 
-    # 이메일로 기존 계정 확인
+    # 이메일 중복 시 자동 병합하지 않음 — 계정 탈취 벡터 차단
     if email:
         result = await db.execute(select(User).where(User.email == email))
-        existing_user = result.scalar_one_or_none()
-        if existing_user:
-            # 기존 이메일 계정에 소셜 로그인 연결
-            existing_user.auth_provider = provider
-            existing_user.auth_provider_id = provider_id
-            await db.commit()
-            await db.refresh(existing_user)
-            return existing_user
+        if result.scalar_one_or_none():
+            raise SocialAuthError("이미 이메일/비밀번호로 가입된 계정입니다. 기존 계정으로 로그인 후 소셜 연결을 진행해 주세요.")
 
     # 신규 사용자 생성
     if not email:

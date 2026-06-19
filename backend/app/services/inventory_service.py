@@ -75,7 +75,7 @@ async def _aggregate_consumption(
 async def process_batch_sale(
     db: AsyncSession,
     store_id: int,
-    actor_id: int,
+    actor_id: int | None,
     request: BatchSaleRequest,
     reference: str | None = None,
 ) -> BatchSaleResult:
@@ -87,7 +87,7 @@ async def process_batch_sale(
 
     # 원자재 배치 로드 (N+1 방지)
     mat_rows = await db.execute(
-        select(Material).where(Material.id.in_(list(consumption.keys())))
+        select(Material).where(Material.id.in_(list(consumption.keys()))).with_for_update()
     )
     materials: dict[int, Material] = {m.id: m for m in mat_rows.scalars().all()}
 
