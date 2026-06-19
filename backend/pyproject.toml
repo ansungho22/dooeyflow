@@ -1,0 +1,51 @@
+[project]
+name = "dooeyflow-backend"
+version = "0.1.0"
+description = "요식업 재고관리 앱 백엔드 (FastAPI)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "greenlet>=3.1.0",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.6.0",
+    "redis>=5.2.0",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    # passlib 1.7.4는 bcrypt 4.1+ 의 __about__ 제거와 호환되지 않아 4.0.x로 고정
+    "bcrypt>=4.0,<4.1",
+    "python-multipart>=0.0.12",
+    "email-validator>=2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "httpx>=0.28.0",
+    "aiosqlite>=0.20.0",
+    "ruff>=0.8.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# str+Enum 패턴은 SQLAlchemy Enum 매핑과의 명시적 호환을 위해 의도적으로 유지
+ignore = ["UP042"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--cov=app --cov-report=term-missing"
+
+[tool.coverage.run]
+omit = ["app/main.py", "alembic/*", "tests/*"]
+# SQLAlchemy 2.0 async는 DB I/O를 greenlet에서 실행하므로 추적을 위해 필요
+concurrency = ["greenlet", "thread"]

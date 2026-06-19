@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Dooeyflow 디자인 토큰 — 토스(Toss) 스타일
+  심플 + 높은 가시성. 클린 블루 강조, 넉넉한 여백, 큰 숫자 가독성.
+*/
+:root {
+  /* 표면 */
+  --color-surface: oklch(98.4% 0.002 250); /* #F9FAFB */
+  --color-surface-raised: oklch(100% 0 0); /* #FFFFFF */
+  --color-surface-sunken: oklch(96.5% 0.003 250); /* #F2F4F6 */
+
+  /* 텍스트 */
+  --color-text: oklch(24% 0.012 256); /* #191F28 */
+  --color-text-muted: oklch(46% 0.014 256); /* #4E5968 */
+  --color-text-subtle: oklch(64% 0.012 256); /* #8B95A1 */
+  --color-border: oklch(92.5% 0.004 256); /* #E5E8EB */
+
+  /* 강조: 토스 블루 */
+  --color-accent: oklch(62% 0.19 256); /* #3182F6 */
+  --color-accent-strong: oklch(55% 0.2 256); /* #2272EB */
+  --color-accent-soft: oklch(95% 0.03 256); /* #E8F1FE */
+
+  /* 상태 */
+  --color-ok: oklch(64% 0.16 152); /* 그린 */
+  --color-warn: oklch(75% 0.15 75);
+  --color-danger: oklch(60% 0.21 25); /* #F04452 계열 */
+  --color-danger-soft: oklch(96% 0.025 25); /* #FDECEE */
+
+  /* 타이포 스케일 */
+  --text-stat: clamp(1.9rem, 1.4rem + 2vw, 2.8rem);
+  --text-heading: clamp(1.3rem, 1.05rem + 1vw, 1.7rem);
+
+  /* 라운드/그림자/모션 — 토스식 큰 라운드 + 미묘한 그림자 */
+  --radius: 0.75rem; /* 12px 인풋/버튼 */
+  --radius-lg: 1.25rem; /* 20px 카드 */
+  --shadow-card: 0 1px 3px oklch(30% 0.02 256 / 0.05), 0 4px 16px oklch(30% 0.02 256 / 0.05);
+  --duration-fast: 150ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em; /* 토스식 살짝 타이트한 자간 */
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
