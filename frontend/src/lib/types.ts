@@ -65,11 +65,13 @@ export interface InventoryTransaction {
   reason_code: "SALE" | "WASTE" | "AUDIT" | "CANCEL";
   actor_id: number | null;
   reference: string | null;
+  created_at: string;
 }
 
 export interface BatchSaleResult {
   changes: MaterialStockChange[];
   low_stock_materials: MaterialStockChange[];
+  menus_without_recipe: string[];
 }
 
 export interface AuthToken {

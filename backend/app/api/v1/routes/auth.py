@@ -2,12 +2,13 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentUser
 from app.core.database import get_db
 from app.core.security import create_access_token
+from app.main import limiter
 from app.schemas.auth import LoginRequest, Token, UserCreate, UserRead
 from app.services import auth_service
 
@@ -17,7 +18,8 @@ DbSession = Annotated[AsyncSession, Depends(get_db)]
 
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-async def register(payload: UserCreate, db: DbSession) -> UserRead:
+@limiter.limit("5/minute")
+async def register(request: Request, payload: UserCreate, db: DbSession) -> UserRead:
     try:
         user = await auth_service.register_user(db, payload)
     except auth_service.EmailAlreadyExists as exc:
@@ -26,7 +28,8 @@ async def register(payload: UserCreate, db: DbSession) -> UserRead:
 
 
 @router.post("/login", response_model=Token)
-async def login(payload: LoginRequest, db: DbSession) -> Token:
+@limiter.limit("5/minute")
+async def login(request: Request, payload: LoginRequest, db: DbSession) -> Token:
     try:
         user = await auth_service.authenticate_user(db, payload.email, payload.password)
     except auth_service.InvalidCredentials as exc:

@@ -53,6 +53,17 @@ export function TransactionHistory({ storeId, materials, refreshTrigger }: Props
           : formatQuantity(Math.abs(qty).toString());
         const displayUnit = unit ? getDisplayUnit(unit) : "";
 
+        const createdAt = new Date(tx.created_at);
+        const dateLabel = createdAt.toLocaleDateString("ko-KR", {
+          month: "2-digit",
+          day: "2-digit",
+        });
+        const timeLabel = createdAt.toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+
         return (
           <li key={tx.id} className="flex items-center justify-between py-2 text-sm">
             <div className="flex items-center gap-2">
@@ -67,9 +78,14 @@ export function TransactionHistory({ storeId, materials, refreshTrigger }: Props
               >
                 {REASON_LABELS[tx.reason_code]}
               </span>
-              <span className="font-medium">
-                {material?.name ?? `재료 #${tx.material_id}`}
-              </span>
+              <div>
+                <span className="font-medium">
+                  {material?.name ?? `재료 #${tx.material_id}`}
+                </span>
+                <p className="text-xs text-text-subtle">
+                  {dateLabel} {timeLabel}
+                </p>
+              </div>
             </div>
             <span
               className={`tabular font-bold ${isPositive ? "text-ok" : "text-danger"}`}

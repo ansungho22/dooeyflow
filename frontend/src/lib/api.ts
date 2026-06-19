@@ -107,6 +107,14 @@ export async function getOAuthUrl(provider: OAuthProvider): Promise<OAuthStartRe
   return request<OAuthStartResponse>(`/api/v1/oauth/${provider}/start`);
 }
 
+/** 일회용 OAuth 코드를 JWT 토큰으로 교환 */
+export async function exchangeOAuthCode(code: string): Promise<AuthToken> {
+  return request<AuthToken>("/api/v1/oauth/exchange", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+}
+
 // --- 매장 ---
 
 export async function listStores(): Promise<Store[]> {

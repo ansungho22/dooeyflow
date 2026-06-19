@@ -41,10 +41,11 @@ class MaterialNotInStore(DeductionError):
 
 async def _aggregate_consumption(
     db: AsyncSession, store_id: int, request: BatchSaleRequest
-) -> dict[int, Decimal]:
+) -> tuple[dict[int, Decimal], list[str]]:
     """판매 라인 → 원자재별 총 소비량(Decimal) 집계.
 
     메뉴/레시피가 모두 같은 매장 소속인지 검증하며, 위반 시 예외로 전체 차단한다.
+    레시피가 없는 메뉴 이름 목록도 함께 반환한다.
     """
     menu_ids = [line.menu_id for line in request.lines]
 
@@ -61,6 +62,14 @@ async def _aggregate_consumption(
     recipe_rows = await db.execute(select(Recipe).where(Recipe.menu_id.in_(menu_ids)))
     recipes = recipe_rows.scalars().all()
 
+    # 레시피 없는 메뉴 감지
+    menus_with_recipe = {r.menu_id for r in recipes}
+    menus_without_recipe = [
+        menus[line.menu_id].name
+        for line in request.lines
+        if line.menu_id not in menus_with_recipe
+    ]
+
     qty_by_menu = {line.menu_id: line.quantity_sold for line in request.lines}
     consumption: dict[int, Decimal] = defaultdict(lambda: Decimal("0"))
     for recipe in recipes:
@@ -69,7 +78,7 @@ async def _aggregate_consumption(
             qty_by_menu[recipe.menu_id]
         )
 
-    return consumption
+    return consumption, menus_without_recipe
 
 
 async def process_batch_sale(
@@ -83,7 +92,7 @@ async def process_batch_sale(
 
     원자성: 검증 실패 시 어떤 변경도 커밋하지 않는다.
     """
-    consumption = await _aggregate_consumption(db, store_id, request)
+    consumption, menus_without_recipe = await _aggregate_consumption(db, store_id, request)
 
     # 원자재 배치 로드 (N+1 방지)
     mat_rows = await db.execute(
@@ -122,7 +131,11 @@ async def process_batch_sale(
     await db.commit()
 
     low_stock = [c for c in changes if c.is_low_stock]
-    return BatchSaleResult(changes=changes, low_stock_materials=low_stock)
+    return BatchSaleResult(
+        changes=changes,
+        low_stock_materials=low_stock,
+        menus_without_recipe=menus_without_recipe,
+    )
 
 
 async def adjust_stock(

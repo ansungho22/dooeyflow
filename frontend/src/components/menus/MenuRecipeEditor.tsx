@@ -68,8 +68,12 @@ export function MenuRecipeEditor({
   }
 
   async function handleDelete(recipeId: number): Promise<void> {
-    await deleteRecipeItem(storeId, menu.id, recipeId);
-    setRecipes((prev) => prev.filter((r) => r.id !== recipeId));
+    try {
+      await deleteRecipeItem(storeId, menu.id, recipeId);
+      setRecipes((prev) => prev.filter((r) => r.id !== recipeId));
+    } catch (err: unknown) {
+      setError(err instanceof ApiError ? err.message : "삭제에 실패했습니다.");
+    }
   }
 
   const availableMaterials = materials.filter(

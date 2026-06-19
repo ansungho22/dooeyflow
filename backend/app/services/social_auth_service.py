@@ -1,9 +1,13 @@
 """소셜 로그인 비즈니스 로직. Apple, Kakao, Naver OAuth 처리."""
 
+import base64
+import json
+from datetime import datetime, timedelta, timezone
 from typing import Literal
 from urllib.parse import urlencode
 
 import httpx
+from jose import jwt as jose_jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -59,6 +63,67 @@ def get_oauth_authorization_url(provider: AuthProvider, state: str) -> str:
         return f"https://nid.naver.com/oauth2.0/authorize?{urlencode(params)}"
 
     raise ValueError(f"Unknown provider: {provider}")
+
+
+def _make_apple_client_secret() -> str:
+    """Apple ES256 클라이언트 시크릿 JWT 생성."""
+    private_key = base64.b64decode(settings.apple_private_key).decode()
+    now = datetime.now(tz=timezone.utc)
+    payload = {
+        "iss": settings.apple_team_id,
+        "iat": now,
+        "exp": now + timedelta(days=180),
+        "aud": "https://appleid.apple.com",
+        "sub": settings.apple_client_id,
+    }
+    return jose_jwt.encode(
+        payload,
+        private_key,
+        algorithm="ES256",
+        headers={"kid": settings.apple_key_id},
+    )
+
+
+async def _get_apple_user_info(code: str, state: str | None) -> dict:
+    """Apple 코드를 토큰으로 교환하고 사용자 정보를 추출."""
+    redirect_uri = f"{settings.oauth_redirect_base}/auth/callback/apple"
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        resp = await client.post(
+            "https://appleid.apple.com/auth/token",
+            data={
+                "client_id": settings.apple_client_id,
+                "client_secret": _make_apple_client_secret(),
+                "code": code,
+                "grant_type": "authorization_code",
+                "redirect_uri": redirect_uri,
+            },
+        )
+        if resp.status_code != 200:
+            raise ProviderError(f"Apple token exchange failed: {resp.text}")
+        token_data = resp.json()
+
+    id_token = token_data.get("id_token")
+    if not id_token:
+        raise ProviderError("Apple id_token이 응답에 없습니다.")
+
+    # Apple ID token claims 추출 (서명 검증 없이 payload 파싱)
+    try:
+        payload_part = id_token.split(".")[1]
+        # Base64 패딩 보정
+        payload_part += "=" * (4 - len(payload_part) % 4)
+        claims = json.loads(base64.urlsafe_b64decode(payload_part))
+    except Exception as exc:
+        raise ProviderError(f"Apple id_token 파싱 실패: {exc}") from exc
+
+    sub = claims.get("sub")
+    if not sub:
+        raise ProviderError("Apple id_token에 sub 클레임이 없습니다.")
+
+    return {
+        "sub": sub,
+        "email": claims.get("email"),
+    }
 
 
 async def _exchange_code_for_token_kakao(code: str) -> dict:
@@ -145,9 +210,10 @@ async def authenticate_with_code(
         name = user_info.get("name") or user_info.get("nickname")
 
     elif provider == "apple":
-        # Apple은 id_token에서 정보 추출 (더 복잡한 JWT 검증 필요)
-        # 여기서는 간단히 code를 provider_id로 사용 (실제 구현 시 JWT 파싱 필요)
-        raise NotImplementedError("Apple 로그인은 아직 구현 중입니다.")
+        apple_info = await _get_apple_user_info(code, state)
+        provider_id = apple_info["sub"]
+        email = apple_info.get("email")
+        name = None  # Apple은 최초 인증 시에만 이름 제공 (form_post body에 포함)
 
     else:
         raise ValueError(f"Unknown provider: {provider}")

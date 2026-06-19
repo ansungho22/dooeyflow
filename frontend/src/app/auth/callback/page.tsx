@@ -3,6 +3,7 @@
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/useAuth";
+import { exchangeOAuthCode } from "@/lib/api";
 
 function AuthCallbackContent() {
   const router = useRouter();
@@ -10,7 +11,7 @@ function AuthCallbackContent() {
   const { setToken } = useAuth();
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    const code = searchParams.get("code");
     const error = searchParams.get("error");
 
     if (error) {
@@ -18,12 +19,19 @@ function AuthCallbackContent() {
       return;
     }
 
-    if (token) {
-      setToken(token);
-      router.replace("/dashboard");
-    } else {
-      router.replace("/login?error=no_token");
+    if (!code) {
+      router.replace("/login?error=no_code");
+      return;
     }
+
+    exchangeOAuthCode(code)
+      .then((data) => {
+        setToken(data.access_token);
+        router.replace("/dashboard");
+      })
+      .catch(() => {
+        router.replace("/login?error=exchange_failed");
+      });
   }, [searchParams, router, setToken]);
 
   return <p className="text-text-muted">로그인 처리 중…</p>;

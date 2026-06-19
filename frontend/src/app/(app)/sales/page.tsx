@@ -114,6 +114,17 @@ export default function SalesPage() {
             </p>
           )}
 
+          {result && result.menus_without_recipe.length > 0 && (
+            <div className="rounded bg-warning-soft px-4 py-3 text-sm text-warning">
+              <p className="font-medium">레시피 없는 메뉴 — 재고가 차감되지 않았습니다:</p>
+              <ul className="mt-1 list-inside list-disc">
+                {result.menus_without_recipe.map((name) => (
+                  <li key={name}>{name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="sticky bottom-4 space-y-2">
             <Button
               onClick={handleSubmit}

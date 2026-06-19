@@ -13,7 +13,8 @@ dependencies = [
     "pydantic>=2.10.0",
     "pydantic-settings>=2.6.0",
     "redis>=5.2.0",
-    "python-jose[cryptography]>=3.3.0",
+    "PyJWT>=2.9.0",
+    "slowapi>=0.1.9",
     "passlib[bcrypt]>=1.7.4",
     # passlib 1.7.4는 bcrypt 4.1+ 의 __about__ 제거와 호환되지 않아 4.0.x로 고정
     "bcrypt>=4.0,<4.1",

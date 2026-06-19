@@ -1,5 +1,6 @@
 """재고 차감/조정 요청·응답 스키마."""
 
+from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -36,6 +37,7 @@ class BatchSaleResult(BaseModel):
 
     changes: list[MaterialStockChange]
     low_stock_materials: list[MaterialStockChange]
+    menus_without_recipe: list[str] = Field(default_factory=list)
 
 
 class StockAdjustment(BaseModel):
@@ -56,3 +58,4 @@ class InventoryTransactionRead(BaseModel):
     reason_code: ReasonCode
     actor_id: int | None
     reference: str | None
+    created_at: datetime
